@@ -1,6 +1,8 @@
 package med.voll.api.controller;
 
 import med.voll.api.domain.usuario.DadosAutenticacao;
+import med.voll.api.domain.usuario.Usuario;
+import med.voll.api.infra.secutiry.TokenService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -16,11 +18,14 @@ public class AutenticacaoController {
 
     @Autowired
     private AuthenticationManager manager;
+
+    @Autowired
+    private TokenService tokenService;
     @PostMapping
     public ResponseEntity login(@RequestBody DadosAutenticacao dados) {
         var token = new UsernamePasswordAuthenticationToken(dados.login(), dados.senha());
-        var autenticatiio = manager.authenticate(token);
+        var autenticador = manager.authenticate(token);
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(tokenService.gerarToken((Usuario) autenticador.getPrincipal()));
     }
 }
