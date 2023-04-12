@@ -22,9 +22,15 @@ public class UsuarioController {
     @PostMapping
     @Transactional
     public ResponseEntity registerUser(@RequestBody @Valid DadosCadastroUsuario dados) {
-        var usuario = new Usuario(dados);
-        usuarioRepository.save(usuario);
 
-        return ResponseEntity.noContent().build();
+        var usuario = usuarioRepository.findByLogin(dados.login());
+
+        if (usuario == null) {
+            var newUsuario = new Usuario(dados);
+            usuarioRepository.save(newUsuario);
+
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.badRequest().body("Username not available");
     }
 }
