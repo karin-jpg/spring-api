@@ -1,6 +1,5 @@
-package med.voll.api.infra.secutiry;
+package med.voll.api.infra.security;
 
-import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,19 +20,17 @@ public class SecurityFilter extends OncePerRequestFilter {
     private TokenService tokenService;
 
     @Autowired
-    private UsuarioRepository usuarioRepository;
+    private UsuarioRepository repository;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        var tokenJWT = recuperarToken(request);
 
+        if (tokenJWT != null) {
+            var subject = tokenService.getSubject(tokenJWT);
+            var usuario = repository.findByLogin(subject);
 
-        var jwtToken = recuperarToken(request);
-
-        if (jwtToken != null) {
-            var subject = tokenService.getSubject(jwtToken);
-            var usuario = usuarioRepository.findByLogin(subject);
-            var authentication =  new UsernamePasswordAuthenticationToken(usuario, null, usuario.getAuthorities());
-
+            var authentication = new UsernamePasswordAuthenticationToken(usuario, null, usuario.getAuthorities());
             SecurityContextHolder.getContext().setAuthentication(authentication);
         }
 
@@ -45,6 +42,8 @@ public class SecurityFilter extends OncePerRequestFilter {
         if (authorizationHeader != null) {
             return authorizationHeader.replace("Bearer ", "");
         }
+
         return null;
     }
+
 }

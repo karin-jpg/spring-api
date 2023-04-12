@@ -15,6 +15,6 @@ public record DadosEndereco(
         String cidade,
         @NotBlank
         String uf,
-        String numero,
-        String complemento) {
+        String complemento,
+        String numero) {
 }
